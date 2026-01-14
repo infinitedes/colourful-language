@@ -1,0 +1,1630 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>colourful language</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.7.0/p5.min.js"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Poppins', sans-serif;
+            overflow: hidden;
+            background: #000;
+        }
+
+        #canvas-container {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            z-index: 1;
+        }
+
+        #canvas-container canvas {
+            display: block;
+            width: 100% !important;
+            height: 100% !important;
+        }
+
+        /* Hover trigger areas */
+        #hover-trigger-bottom {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            height: 100px;
+            z-index: 100;
+            pointer-events: all;
+        }
+
+        #hover-trigger-top {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 100px;
+            z-index: 100;
+            pointer-events: all;
+        }
+
+        /* Control Panel */
+        #controls {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: rgba(0, 0, 0, 0.85);
+            backdrop-filter: blur(20px);
+            padding: 20px 40px;
+            transform: translateY(100%);
+            transition: transform 0.3s ease, opacity 0.3s ease;
+            opacity: 0;
+            display: flex;
+            gap: 40px;
+            align-items: center;
+            justify-content: center;
+            flex-wrap: wrap;
+            z-index: 101;
+            pointer-events: all;
+        }
+
+        #controls.visible {
+            transform: translateY(0);
+            opacity: 1;
+        }
+
+        /* Mobile tap indicator - always visible */
+        #tap-indicator {
+            position: fixed;
+            bottom: 20px;
+            left: 20px;
+            z-index: 99;
+            color: rgba(255, 255, 255, 0.4);
+            font-size: 11px;
+            font-weight: 300;
+            letter-spacing: 0.5px;
+            pointer-events: none;
+            transition: opacity 0.3s ease;
+        }
+
+        #tap-indicator.hidden {
+            opacity: 0;
+        }
+
+        /* Top text controls panel */
+        #text-controls {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            background: rgba(0, 0, 0, 0.85);
+            backdrop-filter: blur(20px);
+            padding: 20px 40px;
+            transform: translateY(-100%);
+            transition: transform 0.3s ease, opacity 0.3s ease;
+            opacity: 0;
+            display: flex;
+            gap: 40px;
+            align-items: flex-start;
+            z-index: 101;
+            pointer-events: all;
+        }
+
+        #text-controls.visible {
+            transform: translateY(0);
+            opacity: 1;
+        }
+
+        /* Text display overlay */
+        #text-display {
+            position: fixed;
+            top: 50%;
+            left: 5%;
+            max-width: 40%;
+            transform: translateY(-50%);
+            z-index: 50;
+            pointer-events: none;
+            color: white;
+        }
+
+        #quote-text {
+            font-size: 48px;
+            line-height: 1.2;
+            margin-bottom: 20px;
+            word-wrap: break-word;
+            white-space: pre-line;
+        }
+
+        #author-text {
+            font-size: 14px;
+            letter-spacing: 3px;
+            text-transform: uppercase;
+            opacity: 0.8;
+        }
+
+        .control-group {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            min-width: 200px;
+        }
+
+        .control-group label {
+            color: rgba(255, 255, 255, 0.6);
+            font-size: 11px;
+            font-weight: 300;
+            letter-spacing: 0.5px;
+            text-transform: uppercase;
+        }
+
+        .slider-container {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        input[type="range"] {
+            flex: 1;
+            height: 2px;
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 1px;
+            outline: none;
+            -webkit-appearance: none;
+            cursor: pointer;
+        }
+
+        input[type="range"]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            width: 12px;
+            height: 12px;
+            background: white;
+            border-radius: 50%;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        input[type="range"]::-webkit-slider-thumb:hover {
+            transform: scale(1.2);
+        }
+
+        input[type="range"]::-moz-range-thumb {
+            width: 12px;
+            height: 12px;
+            background: white;
+            border-radius: 50%;
+            border: none;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .value-display {
+            font-family: 'Courier New', monospace;
+            font-size: 11px;
+            color: rgba(255, 255, 255, 0.5);
+            min-width: 50px;
+            text-align: right;
+        }
+
+        .button {
+            background: rgba(255, 255, 255, 0.15);
+            color: white;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            padding: 8px 20px;
+            border-radius: 20px;
+            font-size: 11px;
+            font-weight: 400;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .button:hover {
+            background: rgba(255, 255, 255, 0.25);
+            border-color: rgba(255, 255, 255, 0.4);
+        }
+
+        .button.fullscreen {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            z-index: 200;
+            background: transparent;
+            border: none;
+            width: 44px;
+            height: 44px;
+            padding: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 20px;
+            border-radius: 50%;
+            transition: all 0.3s ease;
+            color: rgba(255, 255, 255, 0.6);
+            opacity: 0;
+            pointer-events: none;
+        }
+
+        .button.fullscreen.visible {
+            opacity: 1;
+            pointer-events: all;
+        }
+
+        .button.fullscreen:hover {
+            background: rgba(255, 255, 255, 0.15);
+            color: rgba(255, 255, 255, 1);
+            transform: scale(1.1);
+        }
+
+        /* Custom checkbox styling */
+        input[type="checkbox"] {
+            appearance: none;
+            -webkit-appearance: none;
+            -moz-appearance: none;
+            width: 16px;
+            height: 16px;
+            min-width: 16px;
+            min-height: 16px;
+            border: 1px solid rgba(255, 255, 255, 0.4);
+            border-radius: 3px;
+            background: transparent;
+            background-color: transparent;
+            cursor: pointer;
+            position: relative;
+            transition: all 0.2s ease;
+            margin: 0;
+            padding: 0;
+            vertical-align: middle;
+            display: inline-block;
+            box-sizing: border-box;
+        }
+
+        input[type="checkbox"]:hover {
+            border-color: rgba(255, 255, 255, 0.6);
+        }
+
+        input[type="checkbox"]:checked {
+            background: transparent;
+            background-color: transparent;
+            border-color: rgba(255, 255, 255, 0.6);
+        }
+
+        input[type="checkbox"]:checked::after {
+            content: '✓';
+            position: absolute;
+            color: white;
+            font-size: 12px;
+            line-height: 1;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+        }
+
+        /* Text input and textarea styling */
+        textarea, input[type="text"] {
+            background: rgba(255, 255, 255, 0.1);
+            color: white;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            padding: 10px 15px;
+            border-radius: 4px;
+            font-size: 13px;
+            font-family: 'Poppins', sans-serif;
+            outline: none;
+            resize: vertical;
+            width: 100%;
+        }
+
+        textarea {
+            min-height: 80px;
+            max-height: 200px;
+        }
+
+        textarea:focus, input[type="text"]:focus {
+            border-color: rgba(255, 255, 255, 0.4);
+            background: rgba(255, 255, 255, 0.15);
+        }
+
+        .text-input-group {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            min-width: 300px;
+        }
+
+        .text-input-group label {
+            color: rgba(255, 255, 255, 0.6);
+            font-size: 11px;
+            font-weight: 300;
+            letter-spacing: 0.5px;
+            text-transform: uppercase;
+        }
+
+        /* Mobile responsive styles */
+        @media (max-width: 1024px) {
+            #text-display {
+                left: 5%;
+                right: 5%;
+                max-width: 90%;
+            }
+
+            #quote-text {
+                font-size: 28px;
+            }
+
+            #author-text {
+                font-size: 12px;
+                letter-spacing: 2px;
+            }
+
+            /* Responsive top menu */
+            #text-controls {
+                flex-direction: column;
+                gap: 20px;
+                padding: 15px 20px;
+                max-height: 80vh;
+                overflow-y: auto;
+            }
+
+            .text-input-group {
+                min-width: 100%;
+            }
+
+            .text-input-group textarea {
+                min-height: 60px;
+                max-height: 120px;
+            }
+
+            .control-group {
+                min-width: 100%;
+            }
+
+            #custom-font-input {
+                width: 100% !important;
+                max-width: none !important;
+            }
+
+            .slider-container {
+                width: 100%;
+            }
+
+            /* Mobile-only: Visual tap zone indicators */
+            #tap-zone-top,
+            #tap-zone-bottom {
+                display: block;
+            }
+
+            /* Mobile-only: Backdrop overlay */
+            #menu-backdrop {
+                display: block;
+            }
+
+            /* Hide fullscreen button on mobile */
+            .button.fullscreen {
+                display: none !important;
+            }
+        }
+
+        /* Visual tap zone indicators (mobile only) */
+        #tap-zone-top,
+        #tap-zone-bottom {
+            display: none;
+            position: fixed;
+            left: 0;
+            right: 0;
+            height: 40px;
+            pointer-events: none;
+            z-index: 98;
+            opacity: 0.3;
+            transition: opacity 0.3s ease;
+        }
+
+        #tap-zone-top {
+            top: 0;
+            background: linear-gradient(to bottom, rgba(255, 255, 255, 0.1), transparent);
+        }
+
+        #tap-zone-bottom {
+            bottom: 0;
+            background: linear-gradient(to top, rgba(255, 255, 255, 0.1), transparent);
+        }
+
+        #tap-zone-top.hidden,
+        #tap-zone-bottom.hidden {
+            opacity: 0;
+        }
+
+        /* Backdrop overlay (mobile only) */
+        #menu-backdrop {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 100;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.3s ease;
+        }
+
+        #menu-backdrop.visible {
+            opacity: 1;
+            pointer-events: all;
+        }
+
+        /* Close buttons for menus (mobile only) */
+        .menu-close-btn {
+            display: none;
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            width: 32px;
+            height: 32px;
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 50%;
+            color: rgba(255, 255, 255, 0.7);
+            font-size: 18px;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            z-index: 102;
+        }
+
+        .menu-close-btn:hover,
+        .menu-close-btn:active {
+            background: rgba(255, 255, 255, 0.2);
+            color: white;
+        }
+    </style>
+</head>
+<body>
+    <div id="canvas-container"></div>
+
+    <!-- Text display overlay -->
+    <div id="text-display">
+        <div id="quote-text"></div>
+        <div id="author-text"></div>
+    </div>
+
+    <!-- Mobile-only: Visual tap zone indicators -->
+    <div id="tap-zone-top"></div>
+    <div id="tap-zone-bottom"></div>
+
+    <!-- Mobile-only: Backdrop overlay -->
+    <div id="menu-backdrop"></div>
+
+    <!-- Invisible hover trigger areas -->
+    <div id="hover-trigger-top"></div>
+    <div id="hover-trigger-bottom"></div>
+
+    <!-- Tap indicator for mobile (always visible) -->
+    <div id="tap-indicator">co.des</div>
+
+    <!-- Top Text Controls Panel -->
+    <div id="text-controls">
+        <button class="menu-close-btn" id="text-controls-close">×</button>
+        <div class="text-input-group">
+            <label>Text</label>
+            <textarea id="quote-input" placeholder="Enter quote text...">Colourful Language</textarea>
+        </div>
+
+        <div class="text-input-group">
+            <label>Attribution</label>
+            <input type="text" id="author-input" placeholder="Author name" value="Version 1.0">
+        </div>
+
+        <div class="control-group">
+            <label>Typeface</label>
+            <select id="font-selector" style="background: rgba(255, 255, 255, 0.15); color: white; border: 1px solid rgba(255, 255, 255, 0.2); padding: 8px 12px; border-radius: 4px; font-size: 11px; cursor: pointer; outline: none;">
+                <option value="">Popular fonts...</option>
+                <option value="Poppins">Poppins</option>
+                <option value="Playfair Display">Playfair Display</option>
+                <option value="Roboto">Roboto</option>
+                <option value="Montserrat">Montserrat</option>
+                <option value="Lora">Lora</option>
+                <option value="Merriweather">Merriweather</option>
+                <option value="Open Sans">Open Sans</option>
+                <option value="Raleway">Raleway</option>
+                <option value="Crimson Text">Crimson Text</option>
+                <option value="EB Garamond">EB Garamond</option>
+                <option value="Libre Baskerville">Libre Baskerville</option>
+                <option value="Cormorant Garamond">Cormorant Garamond</option>
+            </select>
+        </div>
+
+        <div class="control-group">
+            <label>Font-Weight</label>
+            <select id="font-weight-selector" style="background: rgba(255, 255, 255, 0.15); color: white; border: 1px solid rgba(255, 255, 255, 0.2); padding: 8px 12px; border-radius: 4px; font-size: 11px; cursor: pointer; outline: none;">
+                <option value="100">Thin (100)</option>
+                <option value="300">Light (300)</option>
+                <option value="400" selected>Regular (400)</option>
+                <option value="500">Medium (500)</option>
+                <option value="600">Semi-Bold (600)</option>
+                <option value="700">Bold (700)</option>
+                <option value="900">Black (900)</option>
+            </select>
+        </div>
+
+        <div class="control-group">
+            <label>Font Size</label>
+            <div class="slider-container">
+                <input type="range" id="font-size-slider" min="20" max="120" step="2" value="48">
+                <span class="value-display" id="font-size-value">48px</span>
+            </div>
+        </div>
+
+        <div class="control-group">
+            <label>Text Colour</label>
+            <input type="color" id="text-color-picker" value="#ffffff" style="width: 60px; height: 32px; border: 1px solid rgba(255, 255, 255, 0.2); border-radius: 4px; cursor: pointer; background: transparent;">
+        </div>
+
+        <div class="control-group">
+            <label>Add Google Font</label>
+            <div style="display: flex; gap: 8px; align-items: center;">
+                <input type="text" id="custom-font-input" placeholder="e.g., Figtree, Inter..." style="background: rgba(255, 255, 255, 0.1); color: white; border: 1px solid rgba(255, 255, 255, 0.2); padding: 8px 12px; border-radius: 4px; font-size: 11px; outline: none; width: 150px;">
+                <button id="add-font-btn" class="button" style="margin: 0; padding: 8px 16px; white-space: nowrap;">Add Font</button>
+            </div>
+            <div style="margin-top: 5px;">
+                <a href="https://fonts.google.com/" target="_blank" style="color: rgba(255, 255, 255, 0.5); font-size: 10px; text-decoration: none;">Browse Google Fonts ↗</a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Control Panel -->
+    <div id="controls">
+        <button class="menu-close-btn" id="controls-close">×</button>
+        <div class="control-group">
+            <label>Transition Speed</label>
+            <div class="slider-container">
+                <input type="range" id="cycleTime" min="30" max="600" step="30" value="240">
+                <span class="value-display" id="cycleTime-value">240s</span>
+            </div>
+        </div>
+
+        <div class="control-group">
+            <label>Saturation</label>
+            <div class="slider-container">
+                <input type="range" id="saturation" min="25" max="100" step="1" value="85">
+                <span class="value-display" id="saturation-value">85%</span>
+            </div>
+        </div>
+
+        <div class="control-group">
+            <label>Bloom Intensity</label>
+            <div class="slider-container">
+                <input type="range" id="blurAmount" min="80" max="200" step="10" value="140">
+                <span class="value-display" id="blurAmount-value">140</span>
+            </div>
+        </div>
+
+        <div class="control-group">
+            <label>Colour Fields</label>
+            <div class="slider-container">
+                <input type="range" id="shapeCount" min="2" max="8" step="1" value="4">
+                <span class="value-display" id="shapeCount-value">4</span>
+            </div>
+        </div>
+
+        <div class="control-group">
+            <label>Edge Blur</label>
+            <div class="slider-container">
+                <input type="range" id="edgeBlur" min="0" max="100" step="5" value="50">
+                <span class="value-display" id="edgeBlur-value">50</span>
+            </div>
+        </div>
+
+        <div class="control-group">
+            <label>Colour Harmony</label>
+            <select id="colorHarmony" style="background: rgba(255, 255, 255, 0.15); color: white; border: 1px solid rgba(255, 255, 255, 0.2); padding: 8px 12px; border-radius: 4px; font-size: 11px; cursor: pointer; outline: none;">
+                <option value="complementary">Complementary</option>
+                <option value="triadic">Triadic</option>
+                <option value="analogous">Analogous</option>
+                <option value="split-complementary">Split Complementary</option>
+            </select>
+        </div>
+
+        <div class="control-group">
+            <div style="display: flex; align-items: center; gap: 8px;">
+                <input type="checkbox" id="performanceMode">
+                <span style="color: rgba(255, 255, 255, 0.6); font-size: 11px; font-weight: 300; letter-spacing: 0.5px;">More detail/slower rendering</span>
+            </div>
+        </div>
+
+        <button class="button" id="regenerate-btn">⟲ Regenerate</button>
+    </div>
+
+    <!-- Fullscreen button -->
+    <button class="button fullscreen" id="fullscreen-btn">[ ]</button>
+
+    <script>
+        // ═══════════════════════════════════════════════════════════════════════
+        // COLOUR FIELDS - QUADRANTS
+        // ═══════════════════════════════════════════════════════════════════════
+
+        let params = {
+            cycleTime: 240,      // seconds for full cycle
+            saturation: 85,      // 0-100
+            blurAmount: 140,     // blur intensity (higher = softer)
+            shapeCount: 4,       // number of shapes in composition
+            edgeBlur: 50,        // 0-100, edge blur between shapes (0 = sharp, 100 = soft)
+            colorHarmony: 'complementary', // 'complementary', 'triadic', 'analogous', 'split-complementary'
+            performanceMode: false, // true = quality rendering (slower), false = performance rendering (faster)
+            seed: 137
+        };
+
+        // Text rendering parameters
+        let textParams = {
+            quoteText: 'Colourful Language',
+            authorText: 'Version 1.0',
+            fontFamily: 'Poppins',
+            fontWeight: '400',
+            fontSize: 48,
+            textColor: '#ffffff'
+        };
+
+        let shapes = [];
+        let startTime;
+        let pg;
+
+        // Detect Safari for blur workaround
+        const isSafari = /^((?!chrome|android).)*safari/i.test(navigator.userAgent);
+
+        function setup() {
+            let canvas = createCanvas(windowWidth, windowHeight);
+            canvas.parent('canvas-container');
+            colorMode(HSL, 360, 100, 100, 100);
+
+            // Set pixel density based on performance mode
+            pixelDensity(params.performanceMode ? 2 : 1);
+
+            // Create graphics buffer for smoother rendering
+            pg = createGraphics(width, height);
+            pg.colorMode(HSL, 360, 100, 100, 100);
+            pg.pixelDensity(params.performanceMode ? 2 : 1);
+
+            randomSeed(params.seed);
+            initializeShapes();
+            startTime = millis();
+        }
+
+        function draw() {
+            let elapsed = (millis() - startTime) / 1000;
+
+            // Dark background with subtle colour shift
+            let bgProgress = (elapsed / (params.cycleTime * 2)) % 1;
+            let bgHue = bgProgress * 360;
+            background(bgHue, 20, 8);
+
+            // Prepare shape data with current colors
+            let shapeData = [];
+            for (let shape of shapes) {
+                // Calculate current hue
+                let progress = (elapsed / params.cycleTime + shape.phaseOffset) % 1;
+                let hue = (shape.baseHue + progress * 360) % 360;
+
+                shapeData.push({
+                    ...shape,
+                    hue: hue
+                });
+            }
+
+            // Render each shape with edge-aware blur
+            for (let shape of shapeData) {
+                renderShapeWithEdges(shape);
+            }
+
+            // Add subtle glow overlay with gradients (no blur filter)
+            drawingContext.globalCompositeOperation = 'screen';
+            for (let shape of shapeData) {
+                // Create radial gradient for soft glow
+                let centerX = shape.x + shape.w / 2;
+                let centerY = shape.y + shape.h / 2;
+                let radius = max(shape.w, shape.h) * 0.8;
+
+                let gradient = drawingContext.createRadialGradient(
+                    centerX, centerY, 0,
+                    centerX, centerY, radius
+                );
+
+                let glowColor = color(shape.hue, params.saturation * 0.6, 85, 15);
+                let transparentColor = color(shape.hue, params.saturation * 0.6, 85, 0);
+
+                gradient.addColorStop(0, glowColor.toString());
+                gradient.addColorStop(0.7, transparentColor.toString());
+
+                drawingContext.fillStyle = gradient;
+                drawingContext.fillRect(shape.x, shape.y, shape.w, shape.h);
+            }
+            drawingContext.globalCompositeOperation = 'source-over';
+
+            // Subtle vignette
+            drawRadialGradient(width/2, height/2,
+                max(width, height) * 0.4,
+                max(width, height) * 1.2,
+                color(0, 0, 0, 0),
+                color(0, 0, 0, 25));
+        }
+
+        function renderShapeWithEdges(shape) {
+            noStroke();
+            let edges = shape.edges;
+            let blurDist = params.blurAmount * 1.5;
+
+            // Render base shape (core)
+            fill(shape.hue, params.saturation, shape.baseLuminosity);
+            rect(shape.x, shape.y, shape.w, shape.h);
+
+            // Add subtle edge darkening (vignette per shape)
+            renderShapeVignette(shape);
+
+            // For each edge, render gradient overlay if edge should bleed
+            let shapeColor = color(shape.hue, params.saturation, shape.baseLuminosity);
+
+            // Top edge gradient
+            if (edges.top.sharpEnd - edges.top.sharpStart < 1) {
+                renderEdgeGradient(
+                    shape.x, shape.y - blurDist,
+                    shape.w, blurDist,
+                    shapeColor, 'top',
+                    edges.top.sharpStart, edges.top.sharpEnd
+                );
+            }
+
+            // Bottom edge gradient
+            if (edges.bottom.sharpEnd - edges.bottom.sharpStart < 1) {
+                renderEdgeGradient(
+                    shape.x, shape.y + shape.h,
+                    shape.w, blurDist,
+                    shapeColor, 'bottom',
+                    edges.bottom.sharpStart, edges.bottom.sharpEnd
+                );
+            }
+
+            // Left edge gradient
+            if (edges.left.sharpEnd - edges.left.sharpStart < 1) {
+                renderEdgeGradient(
+                    shape.x - blurDist, shape.y,
+                    blurDist, shape.h,
+                    shapeColor, 'left',
+                    edges.left.sharpStart, edges.left.sharpEnd
+                );
+            }
+
+            // Right edge gradient
+            if (edges.right.sharpEnd - edges.right.sharpStart < 1) {
+                renderEdgeGradient(
+                    shape.x + shape.w, shape.y,
+                    blurDist, shape.h,
+                    shapeColor, 'right',
+                    edges.right.sharpStart, edges.right.sharpEnd
+                );
+            }
+        }
+
+        function renderShapeVignette(shape) {
+            // Create subtle darkening around edges of each shape
+            let centerX = shape.x + shape.w / 2;
+            let centerY = shape.y + shape.h / 2;
+
+            // Use larger of width/height for radius to ensure coverage (doubled)
+            let radius = max(shape.w, shape.h) * 1.4;
+
+            let gradient = drawingContext.createRadialGradient(
+                centerX, centerY, 0,
+                centerX, centerY, radius
+            );
+
+            // Use multiply blend mode for natural darkening
+            drawingContext.globalCompositeOperation = 'multiply';
+
+            // Create richer, darker version by reducing both saturation and luminosity slightly
+            let centerColor = color(shape.hue, params.saturation * 1.0, 100, 0);
+            let darkColor = color(shape.hue, params.saturation * 0.9, 45, 100);
+
+            gradient.addColorStop(0, centerColor.toString());
+            gradient.addColorStop(0.1, centerColor.toString());
+            gradient.addColorStop(0.8, darkColor.toString());
+            gradient.addColorStop(1, darkColor.toString());
+
+            drawingContext.fillStyle = gradient;
+            drawingContext.fillRect(shape.x, shape.y, shape.w, shape.h);
+
+            // Reset blend mode
+            drawingContext.globalCompositeOperation = 'source-over';
+        }
+
+        function renderEdgeGradient(x, y, w, h, col, edge, sharpStart, sharpEnd) {
+            drawingContext.save();
+
+            // Safari doesn't support canvas blur filters well, use layered gradients instead
+            if (isSafari && params.performanceMode && params.edgeBlur > 0) {
+                // Render multiple gradient passes for Safari to simulate blur
+                let blurLayers = Math.ceil(params.edgeBlur / 20);
+                let baseAlpha = alpha(col);
+
+                for (let i = 0; i < blurLayers; i++) {
+                    let layerAlpha = baseAlpha * (1 - i / blurLayers) * 0.6;
+                    let spreadFactor = 1 + (i * params.edgeBlur / 100);
+                    let layerCol = color(hue(col), saturation(col), lightness(col), layerAlpha);
+
+                    let gradient;
+                    if (edge === 'top') {
+                        gradient = drawingContext.createLinearGradient(x, y + h, x, y - (h * spreadFactor - h));
+                        gradient.addColorStop(0, layerCol.toString());
+                        gradient.addColorStop(1, color(hue(col), saturation(col), lightness(col), 0).toString());
+                    } else if (edge === 'bottom') {
+                        gradient = drawingContext.createLinearGradient(x, y, x, y + h * spreadFactor);
+                        gradient.addColorStop(0, layerCol.toString());
+                        gradient.addColorStop(1, color(hue(col), saturation(col), lightness(col), 0).toString());
+                    } else if (edge === 'left') {
+                        gradient = drawingContext.createLinearGradient(x + w, y, x - (w * spreadFactor - w), y);
+                        gradient.addColorStop(0, layerCol.toString());
+                        gradient.addColorStop(1, color(hue(col), saturation(col), lightness(col), 0).toString());
+                    } else if (edge === 'right') {
+                        gradient = drawingContext.createLinearGradient(x, y, x + w * spreadFactor, y);
+                        gradient.addColorStop(0, layerCol.toString());
+                        gradient.addColorStop(1, color(hue(col), saturation(col), lightness(col), 0).toString());
+                    }
+
+                    drawingContext.fillStyle = gradient;
+                    drawingContext.fillRect(x - w * 0.5, y - h * 0.5, w * 2, h * 2);
+                }
+            } else {
+                // Chrome and other browsers - use CSS filter blur
+                let gradient;
+
+                if (edge === 'top') {
+                    gradient = drawingContext.createLinearGradient(x, y + h, x, y);
+                    gradient.addColorStop(0, col.toString());
+                    gradient.addColorStop(1, color(hue(col), saturation(col), lightness(col), 0).toString());
+                } else if (edge === 'bottom') {
+                    gradient = drawingContext.createLinearGradient(x, y, x, y + h);
+                    gradient.addColorStop(0, col.toString());
+                    gradient.addColorStop(1, color(hue(col), saturation(col), lightness(col), 0).toString());
+                } else if (edge === 'left') {
+                    gradient = drawingContext.createLinearGradient(x + w, y, x, y);
+                    gradient.addColorStop(0, col.toString());
+                    gradient.addColorStop(1, color(hue(col), saturation(col), lightness(col), 0).toString());
+                } else if (edge === 'right') {
+                    gradient = drawingContext.createLinearGradient(x, y, x + w, y);
+                    gradient.addColorStop(0, col.toString());
+                    gradient.addColorStop(1, color(hue(col), saturation(col), lightness(col), 0).toString());
+                }
+
+                // Apply blur filter based on edgeBlur parameter (0 = sharp, 100 = very soft)
+                // Apply blur in quality mode (when performanceMode is true)
+                if (params.performanceMode) {
+                    let blurAmount = map(params.edgeBlur, 0, 100, 0, 50);
+                    drawingContext.filter = `blur(${blurAmount}px)`;
+                }
+
+                drawingContext.fillStyle = gradient;
+                drawingContext.fillRect(x, y, w, h);
+
+                drawingContext.filter = 'none';
+            }
+
+            drawingContext.restore();
+        }
+
+        function drawRadialGradient(x, y, innerRadius, outerRadius, innerColor, outerColor) {
+            let gradient = drawingContext.createRadialGradient(x, y, innerRadius, x, y, outerRadius);
+            gradient.addColorStop(0, innerColor.toString());
+            gradient.addColorStop(1, outerColor.toString());
+
+            drawingContext.fillStyle = gradient;
+            drawingContext.fillRect(0, 0, width, height);
+        }
+
+        function drawTextOverlay() {
+            drawingContext.save();
+
+            // Text positioning - match the HTML overlay (5% from left, vertically centered)
+            let textX = width * 0.05;
+            let maxTextWidth = width * 0.4;
+
+            // Adjust for mobile
+            if (width < 1024) {
+                maxTextWidth = width * 0.9;
+            }
+
+            // Draw quote text with word wrapping
+            if (textParams.quoteText) {
+                // Set font for measuring
+                drawingContext.font = `${textParams.fontWeight} ${textParams.fontSize}px '${textParams.fontFamily}'`;
+
+                let words = textParams.quoteText.split(' ');
+                let lines = [];
+                let currentLine = '';
+
+                // Manual word wrapping
+                for (let word of words) {
+                    let testLine = currentLine + (currentLine ? ' ' : '') + word;
+                    let testWidth = drawingContext.measureText(testLine).width;
+
+                    if (testWidth > maxTextWidth && currentLine) {
+                        lines.push(currentLine);
+                        currentLine = word;
+                    } else {
+                        currentLine = testLine;
+                    }
+                }
+                if (currentLine) {
+                    lines.push(currentLine);
+                }
+
+                // Calculate total text height
+                let lineHeight = textParams.fontSize * 1.2;
+                let totalTextHeight = lines.length * lineHeight;
+
+                // Add author text height if present
+                let authorHeight = textParams.authorText ? 14 * 1.5 + 20 : 0;
+                let combinedHeight = totalTextHeight + authorHeight;
+
+                // Start Y position (vertically centered)
+                let startY = (height - combinedHeight) / 2;
+
+                // Apply font and styling for quote text
+                drawingContext.font = `${textParams.fontWeight} ${textParams.fontSize}px '${textParams.fontFamily}'`;
+                drawingContext.fillStyle = textParams.textColor;
+                drawingContext.textAlign = 'left';
+                drawingContext.textBaseline = 'top';
+
+                // Draw each line
+                for (let i = 0; i < lines.length; i++) {
+                    let y = startY + (i * lineHeight);
+                    drawingContext.fillText(lines[i], textX, y);
+                }
+
+                // Draw author text
+                if (textParams.authorText) {
+                    let authorY = startY + totalTextHeight + 20;
+                    drawingContext.font = `400 14px '${textParams.fontFamily}'`;
+                    drawingContext.fillStyle = textParams.textColor;
+                    drawingContext.globalAlpha = 0.8;
+
+                    // Uppercase author text
+                    let authorText = textParams.authorText.toUpperCase();
+                    drawingContext.fillText(authorText, textX, authorY);
+                    drawingContext.globalAlpha = 1.0;
+                }
+            }
+
+            drawingContext.restore();
+        }
+
+        function generateHarmoniousPalette(harmonyType) {
+            // Pick a random base hue
+            let baseHue = random(360);
+            let palette = [];
+
+            // Generate luminosity variations for depth
+            let lumValues = [55, 62, 68, 75];
+
+            switch(harmonyType) {
+                case 'complementary':
+                    // Two colors opposite on the wheel (180° apart)
+                    palette.push({ hue: baseHue, lum: lumValues[0] });
+                    palette.push({ hue: (baseHue + 180) % 360, lum: lumValues[1] });
+                    palette.push({ hue: baseHue, lum: lumValues[2] });
+                    palette.push({ hue: (baseHue + 180) % 360, lum: lumValues[3] });
+                    break;
+
+                case 'triadic':
+                    // Three colors evenly spaced (120° apart)
+                    palette.push({ hue: baseHue, lum: lumValues[0] });
+                    palette.push({ hue: (baseHue + 120) % 360, lum: lumValues[1] });
+                    palette.push({ hue: (baseHue + 240) % 360, lum: lumValues[2] });
+                    palette.push({ hue: baseHue, lum: lumValues[3] });
+                    break;
+
+                case 'analogous':
+                    // Colors next to each other (30° apart)
+                    palette.push({ hue: baseHue, lum: lumValues[0] });
+                    palette.push({ hue: (baseHue + 30) % 360, lum: lumValues[1] });
+                    palette.push({ hue: (baseHue + 60) % 360, lum: lumValues[2] });
+                    palette.push({ hue: (baseHue + 90) % 360, lum: lumValues[3] });
+                    break;
+
+                case 'split-complementary':
+                    // Base color + two adjacent to its complement
+                    palette.push({ hue: baseHue, lum: lumValues[0] });
+                    palette.push({ hue: (baseHue + 150) % 360, lum: lumValues[1] });
+                    palette.push({ hue: (baseHue + 210) % 360, lum: lumValues[2] });
+                    palette.push({ hue: baseHue, lum: lumValues[3] });
+                    break;
+
+                default:
+                    // Default to complementary
+                    palette.push({ hue: baseHue, lum: lumValues[0] });
+                    palette.push({ hue: (baseHue + 180) % 360, lum: lumValues[1] });
+                    palette.push({ hue: baseHue, lum: lumValues[2] });
+                    palette.push({ hue: (baseHue + 180) % 360, lum: lumValues[3] });
+            }
+
+            return palette;
+        }
+
+        function initializeShapes() {
+            shapes = [];
+
+            // Generate colour palette based on harmony rules
+            let colourPalette = generateHarmoniousPalette(params.colorHarmony);
+
+            // Mondrian-style subdivision that fills entire viewport
+            let rects = mondrianSubdivide(0, 0, width, height, params.shapeCount);
+
+            // Assign properties to each shape
+            for (let rect of rects) {
+                // Pick color
+                let paletteIndex = floor(random(colourPalette.length));
+                let baseColour = colourPalette[paletteIndex];
+                let hueVariation = random(-20, 20);
+                let lumVariation = random(-8, 8);
+
+                // For each edge, determine how much is sharp vs blurred
+                // sharpStart and sharpEnd define the portion that's sharp (0-1 along edge length)
+                shapes.push({
+                    x: rect.x,
+                    y: rect.y,
+                    w: rect.w,
+                    h: rect.h,
+                    baseHue: (baseColour.hue + hueVariation + 360) % 360,
+                    baseLuminosity: constrain(baseColour.lum + lumVariation, 50, 85),
+                    phaseOffset: random(1),
+                    edges: {
+                        top: createEdge(),
+                        right: createEdge(),
+                        bottom: createEdge(),
+                        left: createEdge()
+                    }
+                });
+            }
+        }
+
+        function createEdge() {
+            // All edges rendered with blur - blur amount controlled by params.edgeBlur
+            return { sharpStart: 0, sharpEnd: 0 };
+        }
+
+        function mondrianSubdivide(x, y, w, h, targetCount) {
+            let rects = [];
+            let toSplit = [{ x, y, w, h }];
+
+            // Detect narrow viewport (mobile/tablet)
+            let isNarrow = width < 768;
+
+            while (rects.length + toSplit.length < targetCount && toSplit.length > 0) {
+                // Pick a rectangle to split
+                let rect = toSplit.pop();
+
+                // On narrow viewports, strongly prefer horizontal splits (vertical stacking)
+                let splitVertical;
+                if (isNarrow) {
+                    // 80% chance of horizontal split on narrow screens
+                    splitVertical = random() > 0.8;
+                } else {
+                    // Normal behavior: split based on aspect ratio
+                    splitVertical = rect.w > rect.h;
+                    if (rect.w === rect.h) {
+                        splitVertical = random() > 0.5;
+                    }
+                }
+
+                // Adjust minimum split size based on viewport
+                let minWidthRatio = isNarrow ? 0.8 : 0.2;
+                let minHeightRatio = isNarrow ? 0.15 : 0.2;
+
+                if (splitVertical && rect.w > width * minWidthRatio) {
+                    // Split vertically
+                    let splitRatio = random(0.35, 0.65);
+                    let splitX = rect.x + rect.w * splitRatio;
+
+                    toSplit.push({ x: rect.x, y: rect.y, w: rect.w * splitRatio, h: rect.h });
+                    toSplit.push({ x: splitX, y: rect.y, w: rect.w * (1 - splitRatio), h: rect.h });
+                } else if (!splitVertical && rect.h > height * minHeightRatio) {
+                    // Split horizontally
+                    let splitRatio = random(0.35, 0.65);
+                    let splitY = rect.y + rect.h * splitRatio;
+
+                    toSplit.push({ x: rect.x, y: rect.y, w: rect.w, h: rect.h * splitRatio });
+                    toSplit.push({ x: rect.x, y: splitY, w: rect.w, h: rect.h * (1 - splitRatio) });
+                } else {
+                    // Can't split further, add to final rects
+                    rects.push(rect);
+                }
+            }
+
+            // Add remaining rectangles
+            rects = rects.concat(toSplit);
+            return rects;
+        }
+
+        function windowResized() {
+            resizeCanvas(windowWidth, windowHeight);
+            pg.remove();
+            pg = createGraphics(width, height);
+            pg.colorMode(HSL, 360, 100, 100, 100);
+            pg.pixelDensity(params.performanceMode ? 2 : 1);
+
+            // Regenerate shapes to adapt to new viewport size
+            randomSeed(params.seed);
+            initializeShapes();
+        }
+
+        // ═══════════════════════════════════════════════════════════════════════
+        // UI CONTROL HANDLERS
+        // ═══════════════════════════════════════════════════════════════════════
+
+        window.addEventListener('DOMContentLoaded', function() {
+            // Sliders
+            document.getElementById('cycleTime').addEventListener('input', function(e) {
+                params.cycleTime = parseFloat(e.target.value);
+                document.getElementById('cycleTime-value').textContent = e.target.value + 's';
+            });
+
+            document.getElementById('saturation').addEventListener('input', function(e) {
+                params.saturation = parseFloat(e.target.value);
+                document.getElementById('saturation-value').textContent = e.target.value + '%';
+            });
+
+            document.getElementById('blurAmount').addEventListener('input', function(e) {
+                params.blurAmount = parseFloat(e.target.value);
+                document.getElementById('blurAmount-value').textContent = e.target.value;
+            });
+
+            document.getElementById('shapeCount').addEventListener('input', function(e) {
+                params.shapeCount = parseInt(e.target.value);
+                document.getElementById('shapeCount-value').textContent = e.target.value;
+                randomSeed(params.seed);
+                initializeShapes();
+            });
+
+            document.getElementById('edgeBlur').addEventListener('input', function(e) {
+                params.edgeBlur = parseFloat(e.target.value);
+                document.getElementById('edgeBlur-value').textContent = e.target.value;
+            });
+
+            document.getElementById('colorHarmony').addEventListener('change', function(e) {
+                params.colorHarmony = e.target.value;
+                randomSeed(params.seed);
+                initializeShapes();
+            });
+
+            // Performance mode toggle
+            document.getElementById('performanceMode').addEventListener('change', function(e) {
+                params.performanceMode = e.target.checked;
+                // Recreate canvas with new pixel density
+                pixelDensity(params.performanceMode ? 2 : 1);
+                pg.remove();
+                pg = createGraphics(width, height);
+                pg.colorMode(HSL, 360, 100, 100, 100);
+                pg.pixelDensity(params.performanceMode ? 2 : 1);
+            });
+
+            // Regenerate button
+            document.getElementById('regenerate-btn').addEventListener('click', function() {
+                params.seed = Math.floor(Math.random() * 10000);
+                randomSeed(params.seed);
+                initializeShapes();
+            });
+
+            // Fullscreen button
+            document.getElementById('fullscreen-btn').addEventListener('click', function() {
+                if (!document.fullscreenElement) {
+                    document.documentElement.requestFullscreen();
+                } else {
+                    document.exitFullscreen();
+                }
+            });
+
+            // Handle fullscreen changes - resize canvas and regenerate shapes
+            document.addEventListener('fullscreenchange', function() {
+                setTimeout(function() {
+                    resizeCanvas(windowWidth, windowHeight);
+                    pg.remove();
+                    pg = createGraphics(width, height);
+                    pg.colorMode(HSL, 360, 100, 100, 100);
+                    pg.pixelDensity(params.performanceMode ? 2 : 1);
+                    randomSeed(params.seed);
+                    initializeShapes();
+                }, 100);
+            });
+
+            // Text display functionality
+            let quoteInput = document.getElementById('quote-input');
+            let authorInput = document.getElementById('author-input');
+            let fontSelector = document.getElementById('font-selector');
+            let fontWeightSelector = document.getElementById('font-weight-selector');
+            let quoteDisplay = document.getElementById('quote-text');
+            let authorDisplay = document.getElementById('author-text');
+
+            // Initialize display with default values
+            quoteDisplay.textContent = quoteInput.value;
+            authorDisplay.textContent = authorInput.value;
+
+            // Update text display
+            quoteInput.addEventListener('input', function() {
+                quoteDisplay.textContent = this.value;
+                textParams.quoteText = this.value;
+            });
+
+            // Handle paste events
+            quoteInput.addEventListener('paste', function(e) {
+                setTimeout(() => {
+                    quoteDisplay.textContent = this.value;
+                    textParams.quoteText = this.value;
+                }, 0);
+            });
+
+            authorInput.addEventListener('input', function() {
+                authorDisplay.textContent = this.value;
+                textParams.authorText = this.value;
+            });
+
+            authorInput.addEventListener('paste', function(e) {
+                setTimeout(() => {
+                    authorDisplay.textContent = this.value;
+                    textParams.authorText = this.value;
+                }, 0);
+            });
+
+            // Load and apply Google Font from dropdown
+            fontSelector.addEventListener('change', function() {
+                let fontName = this.value;
+                if (fontName) {
+                    let link = document.createElement('link');
+                    link.href = `https://fonts.googleapis.com/css2?family=${fontName.replace(/ /g, '+')}:wght@100;300;400;500;600;700;900&display=swap`;
+                    link.rel = 'stylesheet';
+                    document.head.appendChild(link);
+                    quoteDisplay.style.fontFamily = `'${fontName}', serif`;
+                    textParams.fontFamily = fontName;
+                }
+            });
+
+            // Apply font weight
+            fontWeightSelector.addEventListener('change', function() {
+                quoteDisplay.style.fontWeight = this.value;
+                textParams.fontWeight = this.value;
+            });
+
+            // Font size slider
+            let fontSizeSlider = document.getElementById('font-size-slider');
+            fontSizeSlider.addEventListener('input', function(e) {
+                let size = e.target.value;
+                quoteDisplay.style.fontSize = size + 'px';
+                document.getElementById('font-size-value').textContent = size + 'px';
+                textParams.fontSize = parseInt(size);
+            });
+
+            // Text color picker
+            let textColorPicker = document.getElementById('text-color-picker');
+            textColorPicker.addEventListener('input', function(e) {
+                quoteDisplay.style.color = e.target.value;
+                authorDisplay.style.color = e.target.value;
+                textParams.textColor = e.target.value;
+            });
+
+            // Add custom Google Font button
+            let customFontInput = document.getElementById('custom-font-input');
+            let addFontBtn = document.getElementById('add-font-btn');
+
+            addFontBtn.addEventListener('click', function() {
+                let fontName = customFontInput.value.trim();
+                if (fontName) {
+                    // Load the font from Google Fonts with all weights
+                    let link = document.createElement('link');
+                    link.href = `https://fonts.googleapis.com/css2?family=${fontName.replace(/ /g, '+')}:wght@100;300;400;500;600;700;900&display=swap`;
+                    link.rel = 'stylesheet';
+                    document.head.appendChild(link);
+
+                    // Add to dropdown if not already there
+                    let existingOption = Array.from(fontSelector.options).find(opt => opt.value === fontName);
+                    if (!existingOption) {
+                        let option = document.createElement('option');
+                        option.value = fontName;
+                        option.textContent = fontName;
+                        fontSelector.appendChild(option);
+                    }
+
+                    // Select the font in dropdown
+                    fontSelector.value = fontName;
+
+                    // Apply the font
+                    quoteDisplay.style.fontFamily = `'${fontName}', serif`;
+                    textParams.fontFamily = fontName;
+
+                    // Clear input
+                    customFontInput.value = '';
+                }
+            });
+
+            // Allow Enter key to add font
+            customFontInput.addEventListener('keypress', function(e) {
+                if (e.key === 'Enter') {
+                    addFontBtn.click();
+                }
+            });
+
+            // Show/hide controls on hover and touch
+            let hoverTriggerBottom = document.getElementById('hover-trigger-bottom');
+            let hoverTriggerTop = document.getElementById('hover-trigger-top');
+            let controls = document.getElementById('controls');
+            let textControls = document.getElementById('text-controls');
+            let fullscreenBtn = document.getElementById('fullscreen-btn');
+            let tapIndicator = document.getElementById('tap-indicator');
+            let menuBackdrop = document.getElementById('menu-backdrop');
+            let tapZoneTop = document.getElementById('tap-zone-top');
+            let tapZoneBottom = document.getElementById('tap-zone-bottom');
+            let hideTimeout;
+            let autoHideTimeout;
+            let hideTimeoutTop;
+
+            // Function to show bottom controls
+            function showControls() {
+                clearTimeout(hideTimeout);
+                clearTimeout(autoHideTimeout);
+                // On mobile, hide top menu when showing bottom menu
+                if (window.innerWidth <= 1024) {
+                    textControls.classList.remove('visible');
+                    menuBackdrop.classList.add('visible');
+                    tapZoneTop.classList.add('hidden');
+                    tapZoneBottom.classList.add('hidden');
+                } else {
+                    fullscreenBtn.classList.add('visible');
+                }
+                controls.classList.add('visible');
+                tapIndicator.classList.add('hidden');
+
+                // Auto-hide after 5 seconds of inactivity on mobile
+                if (window.innerWidth <= 1024) {
+                    autoHideTimeout = setTimeout(function() {
+                        controls.classList.remove('visible');
+                        tapIndicator.classList.remove('hidden');
+                        menuBackdrop.classList.remove('visible');
+                        tapZoneTop.classList.remove('hidden');
+                        tapZoneBottom.classList.remove('hidden');
+                    }, 5000);
+                }
+            }
+
+            // Function to hide bottom controls
+            function hideControls(delay = 500) {
+                clearTimeout(hideTimeout);
+                hideTimeout = setTimeout(function() {
+                    if (!controls.matches(':hover')) {
+                        controls.classList.remove('visible');
+                        if (window.innerWidth > 1024) {
+                            fullscreenBtn.classList.remove('visible');
+                        }
+                        tapIndicator.classList.remove('hidden');
+                        if (window.innerWidth <= 1024) {
+                            menuBackdrop.classList.remove('visible');
+                            tapZoneTop.classList.remove('hidden');
+                            tapZoneBottom.classList.remove('hidden');
+                        }
+                    }
+                }, delay);
+            }
+
+            // Function to show top text controls
+            function showTextControls() {
+                clearTimeout(hideTimeoutTop);
+                // On mobile, hide bottom menu when showing top menu
+                if (window.innerWidth <= 1024) {
+                    clearTimeout(autoHideTimeout);
+                    controls.classList.remove('visible');
+                    menuBackdrop.classList.add('visible');
+                    tapZoneTop.classList.add('hidden');
+                    tapZoneBottom.classList.add('hidden');
+                } else {
+                    controls.classList.remove('visible');
+                    fullscreenBtn.classList.remove('visible');
+                }
+                textControls.classList.add('visible');
+                tapIndicator.classList.add('hidden');
+            }
+
+            // Function to hide top text controls
+            function hideTextControls(delay = 500) {
+                clearTimeout(hideTimeoutTop);
+                hideTimeoutTop = setTimeout(function() {
+                    if (!textControls.matches(':hover')) {
+                        textControls.classList.remove('visible');
+                        tapIndicator.classList.remove('hidden');
+                        if (window.innerWidth <= 1024) {
+                            menuBackdrop.classList.remove('visible');
+                            tapZoneTop.classList.remove('hidden');
+                            tapZoneBottom.classList.remove('hidden');
+                        }
+                    }
+                }, delay);
+            }
+
+            // Function to hide all menus
+            function hideAllMenus() {
+                clearTimeout(hideTimeout);
+                clearTimeout(hideTimeoutTop);
+                clearTimeout(autoHideTimeout);
+                controls.classList.remove('visible');
+                textControls.classList.remove('visible');
+                if (window.innerWidth > 1024) {
+                    fullscreenBtn.classList.remove('visible');
+                }
+                tapIndicator.classList.remove('hidden');
+                if (window.innerWidth <= 1024) {
+                    menuBackdrop.classList.remove('visible');
+                    tapZoneTop.classList.remove('hidden');
+                    tapZoneBottom.classList.remove('hidden');
+                }
+            }
+
+            // Mobile-only: Backdrop click to close all menus
+            menuBackdrop.addEventListener('click', function() {
+                hideAllMenus();
+            });
+
+            // Mobile-only: Close button handlers
+            document.getElementById('text-controls-close').addEventListener('click', function() {
+                hideAllMenus();
+            });
+
+            document.getElementById('controls-close').addEventListener('click', function() {
+                hideAllMenus();
+            });
+
+            // Swipe gesture handling for menus
+            let touchStartY = 0;
+            let touchStartX = 0;
+            let isSwiping = false;
+
+            // Swipe on top menu to dismiss
+            textControls.addEventListener('touchstart', function(e) {
+                touchStartY = e.touches[0].clientY;
+                touchStartX = e.touches[0].clientX;
+                isSwiping = true;
+            }, { passive: true });
+
+            textControls.addEventListener('touchmove', function(e) {
+                if (!isSwiping) return;
+            }, { passive: true });
+
+            textControls.addEventListener('touchend', function(e) {
+                if (!isSwiping) return;
+
+                let touchEndY = e.changedTouches[0].clientY;
+                let touchEndX = e.changedTouches[0].clientX;
+                let deltaY = touchEndY - touchStartY;
+                let deltaX = Math.abs(touchEndX - touchStartX);
+
+                // Swipe up to close (vertical swipe < -50px, mostly vertical not horizontal)
+                if (deltaY < -50 && deltaX < 30) {
+                    hideAllMenus();
+                }
+
+                isSwiping = false;
+            });
+
+            // Swipe on bottom menu to dismiss
+            controls.addEventListener('touchstart', function(e) {
+                touchStartY = e.touches[0].clientY;
+                touchStartX = e.touches[0].clientX;
+                isSwiping = true;
+            }, { passive: true });
+
+            controls.addEventListener('touchmove', function(e) {
+                if (!isSwiping) return;
+            }, { passive: true });
+
+            controls.addEventListener('touchend', function(e) {
+                if (!isSwiping) return;
+
+                let touchEndY = e.changedTouches[0].clientY;
+                let touchEndX = e.changedTouches[0].clientX;
+                let deltaY = touchEndY - touchStartY;
+                let deltaX = Math.abs(touchEndX - touchStartX);
+
+                // Swipe down to close (vertical swipe > 50px, mostly vertical not horizontal)
+                if (deltaY > 50 && deltaX < 30) {
+                    hideAllMenus();
+                }
+
+                isSwiping = false;
+            });
+
+            // Touch support - tap top or bottom half to toggle respective menu
+            let canvasContainer = document.getElementById('canvas-container');
+            canvasContainer.addEventListener('touchstart', function(e) {
+                // Only handle taps on canvas, not controls
+                if (e.target === canvasContainer || e.target.tagName === 'CANVAS') {
+                    let touch = e.touches[0];
+                    let tapY = touch.clientY;
+                    let screenHeight = window.innerHeight;
+
+                    // If any menu is open, close it
+                    if (controls.classList.contains('visible') || textControls.classList.contains('visible')) {
+                        hideAllMenus();
+                        return;
+                    }
+
+                    // No menu open - tap to open appropriate menu
+                    // Tap on top third of screen = open top menu
+                    if (tapY < screenHeight / 3) {
+                        showTextControls();
+                    }
+                    // Tap on bottom third of screen = open bottom menu
+                    else if (tapY > (screenHeight * 2 / 3)) {
+                        showControls();
+                    }
+                }
+            });
+
+            // Reset auto-hide timer on any interaction with bottom controls
+            controls.addEventListener('touchstart', function() {
+                showControls();
+            });
+
+            controls.addEventListener('touchmove', function() {
+                showControls();
+            });
+
+            // Keep top menu open when interacting with it
+            textControls.addEventListener('touchstart', function() {
+                showTextControls();
+            });
+
+            textControls.addEventListener('touchmove', function() {
+                showTextControls();
+            });
+
+            // Desktop hover support - bottom controls
+            hoverTriggerBottom.addEventListener('mouseenter', function() {
+                showControls();
+            });
+
+            controls.addEventListener('mouseenter', function() {
+                clearTimeout(hideTimeout);
+                clearTimeout(autoHideTimeout);
+            });
+
+            controls.addEventListener('mouseleave', function() {
+                hideControls(1000);
+            });
+
+            hoverTriggerBottom.addEventListener('mouseleave', function() {
+                hideControls(500);
+            });
+
+            // Desktop hover support - top text controls
+            hoverTriggerTop.addEventListener('mouseenter', function() {
+                showTextControls();
+            });
+
+            textControls.addEventListener('mouseenter', function() {
+                clearTimeout(hideTimeoutTop);
+            });
+
+            textControls.addEventListener('mouseleave', function() {
+                hideTextControls(1000);
+            });
+
+            hoverTriggerTop.addEventListener('mouseleave', function() {
+                hideTextControls(500);
+            });
+        });
+    </script>
+</body>
+</html>
