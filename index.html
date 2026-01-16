@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <title>colourful language</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.7.0/p5.min.js"></script>
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -349,7 +349,11 @@
             text-transform: uppercase;
         }
 
-        /* Mobile responsive styles */
+        /* ═══════════════════════════════════════════════════════════════════════
+           RESPONSIVE STYLES - All device sizes
+           ═══════════════════════════════════════════════════════════════════════ */
+
+        /* Tablets and below (1024px and under) */
         @media (max-width: 1024px) {
             #text-display {
                 left: 5%;
@@ -358,7 +362,7 @@
             }
 
             #quote-text {
-                font-size: 28px;
+                font-size: clamp(24px, 5vw, 36px);
             }
 
             #author-text {
@@ -371,8 +375,22 @@
                 flex-direction: column;
                 gap: 20px;
                 padding: 15px 20px;
+                padding-top: 50px; /* Space for close button */
                 max-height: 80vh;
                 overflow-y: auto;
+                -webkit-overflow-scrolling: touch;
+            }
+
+            /* Responsive bottom menu */
+            #controls {
+                flex-direction: column;
+                gap: 15px;
+                padding: 15px 20px;
+                padding-top: 50px; /* Space for close button */
+                max-height: 70vh;
+                overflow-y: auto;
+                -webkit-overflow-scrolling: touch;
+                align-items: stretch;
             }
 
             .text-input-group {
@@ -408,9 +426,249 @@
                 display: block;
             }
 
-            /* Hide fullscreen button on mobile */
+            /* Hide fullscreen button on touch devices */
             .button.fullscreen {
                 display: none !important;
+            }
+
+            /* Larger touch targets */
+            input[type="range"]::-webkit-slider-thumb {
+                width: 20px;
+                height: 20px;
+            }
+
+            input[type="range"]::-moz-range-thumb {
+                width: 20px;
+                height: 20px;
+            }
+
+            .button {
+                padding: 12px 24px;
+                font-size: 12px;
+            }
+
+            select {
+                padding: 12px 16px !important;
+                font-size: 13px !important;
+            }
+        }
+
+        /* Tablets in landscape (768px - 1024px) */
+        @media (min-width: 768px) and (max-width: 1024px) {
+            #text-controls {
+                flex-direction: row;
+                flex-wrap: wrap;
+                padding-top: 20px;
+                max-height: 50vh;
+            }
+
+            #controls {
+                flex-direction: row;
+                flex-wrap: wrap;
+                padding-top: 20px;
+                max-height: 40vh;
+                align-items: center;
+                justify-content: center;
+            }
+
+            .text-input-group {
+                min-width: 45%;
+                flex: 1 1 45%;
+            }
+
+            .control-group {
+                min-width: 30%;
+                flex: 1 1 30%;
+            }
+
+            #quote-text {
+                font-size: clamp(28px, 4vw, 42px);
+            }
+        }
+
+        /* Large phones and small tablets (481px - 767px) */
+        @media (min-width: 481px) and (max-width: 767px) {
+            #text-controls,
+            #controls {
+                padding: 15px;
+                padding-top: 50px;
+            }
+
+            #quote-text {
+                font-size: clamp(22px, 6vw, 32px);
+            }
+
+            .control-group {
+                min-width: 48%;
+                flex: 1 1 48%;
+            }
+        }
+
+        /* Small phones (480px and under) */
+        @media (max-width: 480px) {
+            #text-display {
+                left: 4%;
+                right: 4%;
+                max-width: 92%;
+            }
+
+            #quote-text {
+                font-size: clamp(18px, 7vw, 28px);
+                line-height: 1.3;
+            }
+
+            #author-text {
+                font-size: 10px;
+                letter-spacing: 1.5px;
+            }
+
+            #text-controls,
+            #controls {
+                padding: 12px 15px;
+                padding-top: 45px;
+                gap: 12px;
+            }
+
+            .control-group label,
+            .text-input-group label {
+                font-size: 10px;
+            }
+
+            textarea, input[type="text"] {
+                padding: 8px 12px;
+                font-size: 14px; /* Prevents iOS zoom on focus */
+            }
+
+            select {
+                font-size: 14px !important; /* Prevents iOS zoom on focus */
+            }
+
+            .button {
+                padding: 10px 18px;
+                font-size: 11px;
+            }
+
+            .menu-close-btn {
+                width: 36px;
+                height: 36px;
+                font-size: 20px;
+            }
+
+            #tap-indicator {
+                font-size: 10px;
+                bottom: 15px;
+                left: 15px;
+            }
+        }
+
+        /* Landscape orientation on phones */
+        @media (max-height: 500px) and (orientation: landscape) {
+            #text-display {
+                top: 50%;
+                left: 3%;
+                max-width: 50%;
+            }
+
+            #quote-text {
+                font-size: clamp(16px, 4vh, 24px);
+                line-height: 1.2;
+            }
+
+            #author-text {
+                font-size: 10px;
+                margin-top: 10px;
+            }
+
+            #text-controls {
+                flex-direction: row;
+                flex-wrap: wrap;
+                max-height: 70vh;
+                padding: 10px 15px;
+                padding-right: 50px; /* Space for close button */
+                gap: 10px;
+            }
+
+            #controls {
+                flex-direction: row;
+                flex-wrap: wrap;
+                max-height: 60vh;
+                padding: 10px 15px;
+                padding-right: 50px;
+                gap: 10px;
+                align-items: center;
+            }
+
+            .text-input-group {
+                min-width: 200px;
+                flex: 1 1 200px;
+            }
+
+            .text-input-group textarea {
+                min-height: 40px;
+                max-height: 60px;
+            }
+
+            .control-group {
+                min-width: 150px;
+                flex: 1 1 150px;
+            }
+
+            .menu-close-btn {
+                top: 10px;
+                right: 10px;
+            }
+
+            #tap-indicator {
+                bottom: 10px;
+                left: 10px;
+            }
+        }
+
+        /* Very small screens (watches, tiny phones) */
+        @media (max-width: 320px) {
+            #quote-text {
+                font-size: 16px;
+            }
+
+            #text-controls,
+            #controls {
+                padding: 10px;
+                padding-top: 40px;
+                gap: 10px;
+            }
+
+            .control-group label,
+            .text-input-group label {
+                font-size: 9px;
+            }
+        }
+
+        /* Safe area insets for notched devices (iPhone X+, etc.) */
+        @supports (padding: max(0px)) {
+            #controls {
+                padding-bottom: max(15px, env(safe-area-inset-bottom));
+            }
+
+            #text-controls {
+                padding-top: max(50px, calc(env(safe-area-inset-top) + 40px));
+            }
+
+            #tap-indicator {
+                bottom: max(20px, calc(env(safe-area-inset-bottom) + 10px));
+                left: max(20px, calc(env(safe-area-inset-left) + 10px));
+            }
+
+            .button.fullscreen {
+                bottom: max(20px, calc(env(safe-area-inset-bottom) + 10px));
+                right: max(20px, calc(env(safe-area-inset-right) + 10px));
+            }
+        }
+
+        /* High DPI screens - ensure crisp text */
+        @media (-webkit-min-device-pixel-ratio: 2), (min-resolution: 192dpi) {
+            body {
+                -webkit-font-smoothing: antialiased;
+                -moz-osx-font-smoothing: grayscale;
             }
         }
 
@@ -487,6 +745,26 @@
         .menu-close-btn:active {
             background: rgba(255, 255, 255, 0.2);
             color: white;
+        }
+
+        /* Show close buttons on touch devices (1024px and below) */
+        @media (max-width: 1024px) {
+            .menu-close-btn {
+                display: flex;
+            }
+        }
+
+        /* Prevent pull-to-refresh and overscroll on iOS */
+        html, body {
+            overscroll-behavior: none;
+            -webkit-overflow-scrolling: touch;
+        }
+
+        /* Prevent text selection on UI elements */
+        #controls, #text-controls, .button, .menu-close-btn {
+            -webkit-user-select: none;
+            user-select: none;
+            -webkit-touch-callout: none;
         }
     </style>
 </head>
@@ -1154,7 +1432,11 @@
         }
 
         function windowResized() {
-            resizeCanvas(windowWidth, windowHeight);
+            // Use window.innerWidth/Height as fallback for more reliable mobile dimensions
+            let newWidth = window.innerWidth || windowWidth;
+            let newHeight = window.innerHeight || windowHeight;
+
+            resizeCanvas(newWidth, newHeight);
             pg.remove();
             pg = createGraphics(width, height);
             pg.colorMode(HSL, 360, 100, 100, 100);
@@ -1373,12 +1655,24 @@
             let autoHideTimeout;
             let hideTimeoutTop;
 
+            // Detect touch device capability
+            function isTouchDevice() {
+                return (('ontouchstart' in window) ||
+                    (navigator.maxTouchPoints > 0) ||
+                    (navigator.msMaxTouchPoints > 0));
+            }
+
+            // Check if we should use mobile/touch UI
+            function useMobileUI() {
+                return isTouchDevice() || window.innerWidth <= 1024;
+            }
+
             // Function to show bottom controls
             function showControls() {
                 clearTimeout(hideTimeout);
                 clearTimeout(autoHideTimeout);
-                // On mobile, hide top menu when showing bottom menu
-                if (window.innerWidth <= 1024) {
+                // On touch/mobile devices, hide top menu when showing bottom menu
+                if (useMobileUI()) {
                     textControls.classList.remove('visible');
                     menuBackdrop.classList.add('visible');
                     tapZoneTop.classList.add('hidden');
@@ -1389,8 +1683,8 @@
                 controls.classList.add('visible');
                 tapIndicator.classList.add('hidden');
 
-                // Auto-hide after 5 seconds of inactivity on mobile
-                if (window.innerWidth <= 1024) {
+                // Auto-hide after 5 seconds of inactivity on touch devices
+                if (useMobileUI()) {
                     autoHideTimeout = setTimeout(function() {
                         controls.classList.remove('visible');
                         tapIndicator.classList.remove('hidden');
@@ -1407,11 +1701,11 @@
                 hideTimeout = setTimeout(function() {
                     if (!controls.matches(':hover')) {
                         controls.classList.remove('visible');
-                        if (window.innerWidth > 1024) {
+                        if (!useMobileUI()) {
                             fullscreenBtn.classList.remove('visible');
                         }
                         tapIndicator.classList.remove('hidden');
-                        if (window.innerWidth <= 1024) {
+                        if (useMobileUI()) {
                             menuBackdrop.classList.remove('visible');
                             tapZoneTop.classList.remove('hidden');
                             tapZoneBottom.classList.remove('hidden');
@@ -1423,8 +1717,8 @@
             // Function to show top text controls
             function showTextControls() {
                 clearTimeout(hideTimeoutTop);
-                // On mobile, hide bottom menu when showing top menu
-                if (window.innerWidth <= 1024) {
+                // On touch/mobile devices, hide bottom menu when showing top menu
+                if (useMobileUI()) {
                     clearTimeout(autoHideTimeout);
                     controls.classList.remove('visible');
                     menuBackdrop.classList.add('visible');
@@ -1445,7 +1739,7 @@
                     if (!textControls.matches(':hover')) {
                         textControls.classList.remove('visible');
                         tapIndicator.classList.remove('hidden');
-                        if (window.innerWidth <= 1024) {
+                        if (useMobileUI()) {
                             menuBackdrop.classList.remove('visible');
                             tapZoneTop.classList.remove('hidden');
                             tapZoneBottom.classList.remove('hidden');
@@ -1454,56 +1748,104 @@
                 }, delay);
             }
 
+            // Flag to prevent menu from reopening immediately after intentional close
+            let menuJustClosed = false;
+
             // Function to hide all menus
-            function hideAllMenus() {
+            function hideAllMenus(intentional = false) {
                 clearTimeout(hideTimeout);
                 clearTimeout(hideTimeoutTop);
                 clearTimeout(autoHideTimeout);
                 controls.classList.remove('visible');
                 textControls.classList.remove('visible');
-                if (window.innerWidth > 1024) {
+                if (!useMobileUI()) {
                     fullscreenBtn.classList.remove('visible');
                 }
                 tapIndicator.classList.remove('hidden');
-                if (window.innerWidth <= 1024) {
+                if (useMobileUI()) {
                     menuBackdrop.classList.remove('visible');
                     tapZoneTop.classList.remove('hidden');
                     tapZoneBottom.classList.remove('hidden');
                 }
+
+                // If intentionally closed (button/swipe), prevent immediate reopen
+                if (intentional) {
+                    menuJustClosed = true;
+                    setTimeout(function() {
+                        menuJustClosed = false;
+                    }, 300);
+                }
             }
 
             // Mobile-only: Backdrop click to close all menus
-            menuBackdrop.addEventListener('click', function() {
-                hideAllMenus();
+            menuBackdrop.addEventListener('click', function(e) {
+                e.stopPropagation();
+                hideAllMenus(true);
             });
 
             // Mobile-only: Close button handlers
-            document.getElementById('text-controls-close').addEventListener('click', function() {
-                hideAllMenus();
+            let textCloseBtn = document.getElementById('text-controls-close');
+            let controlsCloseBtn = document.getElementById('controls-close');
+
+            textCloseBtn.addEventListener('click', function(e) {
+                e.stopPropagation();
+                hideAllMenus(true);
             });
 
-            document.getElementById('controls-close').addEventListener('click', function() {
-                hideAllMenus();
+            textCloseBtn.addEventListener('touchstart', function(e) {
+                e.stopPropagation();
+            }, { passive: false });
+
+            controlsCloseBtn.addEventListener('click', function(e) {
+                e.stopPropagation();
+                hideAllMenus(true);
             });
+
+            controlsCloseBtn.addEventListener('touchstart', function(e) {
+                e.stopPropagation();
+            }, { passive: false });
 
             // Swipe gesture handling for menus
             let touchStartY = 0;
             let touchStartX = 0;
             let isSwiping = false;
+            let scrolledDuringSwipe = false;
+            let initialScrollTop = 0;
 
             // Swipe on top menu to dismiss
             textControls.addEventListener('touchstart', function(e) {
+                // Only track swipe if touch started on the menu background, not on form elements
+                let target = e.target;
+                let isFormElement = target.tagName === 'INPUT' || target.tagName === 'TEXTAREA' ||
+                                    target.tagName === 'SELECT' || target.tagName === 'BUTTON' ||
+                                    target.closest('select') || target.closest('input') ||
+                                    target.closest('textarea') || target.closest('button');
+
+                if (isFormElement) {
+                    isSwiping = false;
+                    return;
+                }
+
                 touchStartY = e.touches[0].clientY;
                 touchStartX = e.touches[0].clientX;
+                initialScrollTop = textControls.scrollTop;
+                scrolledDuringSwipe = false;
                 isSwiping = true;
             }, { passive: true });
 
             textControls.addEventListener('touchmove', function(e) {
                 if (!isSwiping) return;
+                // Check if scrolling occurred
+                if (textControls.scrollTop !== initialScrollTop) {
+                    scrolledDuringSwipe = true;
+                }
             }, { passive: true });
 
             textControls.addEventListener('touchend', function(e) {
-                if (!isSwiping) return;
+                if (!isSwiping) {
+                    isSwiping = false;
+                    return;
+                }
 
                 let touchEndY = e.changedTouches[0].clientY;
                 let touchEndX = e.changedTouches[0].clientX;
@@ -1511,26 +1853,50 @@
                 let deltaX = Math.abs(touchEndX - touchStartX);
 
                 // Swipe up to close (vertical swipe < -50px, mostly vertical not horizontal)
-                if (deltaY < -50 && deltaX < 30) {
-                    hideAllMenus();
+                // Only dismiss if at top of scroll and didn't scroll during the gesture
+                let atTopOfScroll = textControls.scrollTop <= 0;
+                if (deltaY < -50 && deltaX < 50 && atTopOfScroll && !scrolledDuringSwipe) {
+                    hideAllMenus(true); // Intentional close
                 }
 
                 isSwiping = false;
+                scrolledDuringSwipe = false;
             });
 
             // Swipe on bottom menu to dismiss
             controls.addEventListener('touchstart', function(e) {
+                // Only track swipe if touch started on the menu background, not on form elements
+                let target = e.target;
+                let isFormElement = target.tagName === 'INPUT' || target.tagName === 'TEXTAREA' ||
+                                    target.tagName === 'SELECT' || target.tagName === 'BUTTON' ||
+                                    target.closest('select') || target.closest('input') ||
+                                    target.closest('textarea') || target.closest('button');
+
+                if (isFormElement) {
+                    isSwiping = false;
+                    return;
+                }
+
                 touchStartY = e.touches[0].clientY;
                 touchStartX = e.touches[0].clientX;
+                initialScrollTop = controls.scrollTop;
+                scrolledDuringSwipe = false;
                 isSwiping = true;
             }, { passive: true });
 
             controls.addEventListener('touchmove', function(e) {
                 if (!isSwiping) return;
+                // Check if scrolling occurred
+                if (controls.scrollTop !== initialScrollTop) {
+                    scrolledDuringSwipe = true;
+                }
             }, { passive: true });
 
             controls.addEventListener('touchend', function(e) {
-                if (!isSwiping) return;
+                if (!isSwiping) {
+                    isSwiping = false;
+                    return;
+                }
 
                 let touchEndY = e.changedTouches[0].clientY;
                 let touchEndX = e.changedTouches[0].clientX;
@@ -1538,11 +1904,14 @@
                 let deltaX = Math.abs(touchEndX - touchStartX);
 
                 // Swipe down to close (vertical swipe > 50px, mostly vertical not horizontal)
-                if (deltaY > 50 && deltaX < 30) {
-                    hideAllMenus();
+                // Only dismiss if at bottom of scroll and didn't scroll during the gesture
+                let atBottomOfScroll = controls.scrollTop >= (controls.scrollHeight - controls.clientHeight - 5);
+                if (deltaY > 50 && deltaX < 50 && !scrolledDuringSwipe) {
+                    hideAllMenus(true); // Intentional close
                 }
 
                 isSwiping = false;
+                scrolledDuringSwipe = false;
             });
 
             // Touch support - tap top or bottom half to toggle respective menu
@@ -1550,13 +1919,16 @@
             canvasContainer.addEventListener('touchstart', function(e) {
                 // Only handle taps on canvas, not controls
                 if (e.target === canvasContainer || e.target.tagName === 'CANVAS') {
+                    // Don't open menus if we just closed them
+                    if (menuJustClosed) return;
+
                     let touch = e.touches[0];
                     let tapY = touch.clientY;
                     let screenHeight = window.innerHeight;
 
                     // If any menu is open, close it
                     if (controls.classList.contains('visible') || textControls.classList.contains('visible')) {
-                        hideAllMenus();
+                        hideAllMenus(true); // Intentional close
                         return;
                     }
 
@@ -1573,20 +1945,30 @@
             });
 
             // Reset auto-hide timer on any interaction with bottom controls
-            controls.addEventListener('touchstart', function() {
+            // But don't reopen if we just intentionally closed
+            controls.addEventListener('touchstart', function(e) {
+                // Don't reopen if just closed or if touching close button
+                if (menuJustClosed) return;
+                if (e.target.closest('.menu-close-btn')) return;
                 showControls();
             });
 
-            controls.addEventListener('touchmove', function() {
+            controls.addEventListener('touchmove', function(e) {
+                if (menuJustClosed) return;
                 showControls();
             });
 
             // Keep top menu open when interacting with it
-            textControls.addEventListener('touchstart', function() {
+            // But don't reopen if we just intentionally closed
+            textControls.addEventListener('touchstart', function(e) {
+                // Don't reopen if just closed or if touching close button
+                if (menuJustClosed) return;
+                if (e.target.closest('.menu-close-btn')) return;
                 showTextControls();
             });
 
-            textControls.addEventListener('touchmove', function() {
+            textControls.addEventListener('touchmove', function(e) {
+                if (menuJustClosed) return;
                 showTextControls();
             });
 
@@ -1623,6 +2005,63 @@
 
             hoverTriggerTop.addEventListener('mouseleave', function() {
                 hideTextControls(500);
+            });
+
+            // Orientation change handling for mobile
+            function handleOrientationChange() {
+                // Close all menus immediately on orientation change
+                hideAllMenus();
+
+                // Reset swipe tracking state
+                isSwiping = false;
+                scrolledDuringSwipe = false;
+
+                // Wait for browser to report correct dimensions, then resize
+                setTimeout(function() {
+                    // Use window.innerWidth/Height for reliable mobile dimensions
+                    let newWidth = window.innerWidth || windowWidth;
+                    let newHeight = window.innerHeight || windowHeight;
+
+                    resizeCanvas(newWidth, newHeight);
+                    pg.remove();
+                    pg = createGraphics(width, height);
+                    pg.colorMode(HSL, 360, 100, 100, 100);
+                    pg.pixelDensity(params.performanceMode ? 2 : 1);
+                    randomSeed(params.seed);
+                    initializeShapes();
+                }, 150);
+            }
+
+            // Listen for orientation change (iOS/older Android)
+            window.addEventListener('orientationchange', handleOrientationChange);
+
+            // Also listen for resize as backup (modern browsers often use this instead)
+            let resizeTimeout;
+            let lastWidth = window.innerWidth;
+            let lastHeight = window.innerHeight;
+
+            window.addEventListener('resize', function() {
+                // Debounce resize events
+                clearTimeout(resizeTimeout);
+                resizeTimeout = setTimeout(function() {
+                    let newWidth = window.innerWidth;
+                    let newHeight = window.innerHeight;
+
+                    // Check if this is a significant size change (orientation or window resize)
+                    let widthChanged = Math.abs(newWidth - lastWidth) > 100;
+                    let heightChanged = Math.abs(newHeight - lastHeight) > 100;
+
+                    if (widthChanged || heightChanged) {
+                        // Close menus on significant resize
+                        hideAllMenus();
+                        isSwiping = false;
+                        scrolledDuringSwipe = false;
+
+                        // Update last known dimensions
+                        lastWidth = newWidth;
+                        lastHeight = newHeight;
+                    }
+                }, 100);
             });
         });
     </script>
